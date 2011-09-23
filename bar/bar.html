@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<!--
+    A simple bar chart made with d3.js
+-->
+<html>
+  <head>    
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Enjalot's Bar</title>
+
+
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?2.1.3></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.geom.js?2.1.3"></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.layout.js?2.1.3"></script>
+
+  </head>
+  <body>
+
+   <style type="text/css">
+        .barchart {
+
+        }
+
+        .bar rect {
+        /*
+            fill: black;
+            stroke: black;
+        */
+        }
+
+        .grid_line {
+            stroke: black;
+            stroke-weight: 2;
+        }
+
+        .tick {
+            stroke: black;
+            stroke-opacity: 1;
+            stroke-weight: 1.5;
+        }
+
+        .tick_label {
+            font-size: 15pt;
+            font-family: Verdana;
+            color: gray;
+            fill-opacity: .6;
+        }
+
+        .bar .label {
+            font-size: 15pt;
+            font-family: Verdana;
+            color: gray;
+            fill-opacity: .6;
+        }
+
+        .bar .value {
+            font-size: 11pt;
+            font-family: Verdana;
+            color: gray;
+            fill-opacity: .6;
+        }   
+
+
+    </style>
+
+
+    <script type="text/javascript">
+
+    var data = [{"label":"1990", "value":16}, 
+            {"label":"1991", "value":56}, 
+            {"label":"1992", "value":7},
+            {"label":"1993", "value":77},
+            {"label":"1994", "value":22},
+            {"label":"1995", "value":16},
+            ];
+
+    //maximum of data you want to use
+    var data_max = 80,
+
+    //number of tickmarks to use
+    num_ticks = 5,
+
+    //margins
+    left_margin = 60,
+    right_margin = 60,
+    top_margin = 30,
+    bottom_margin = 0;
+
+
+    var w = 500,                        //width
+        h = 700,                        //height
+        x = d3.scale.linear()
+            .domain([0, data_max])
+            .range([0, w-(left_margin + right_margin)]),                  //x range from 0 to maximum value (scaled to the width)
+            y = d3.scale.ordinal()
+                .domain(d3.range(data.length))
+                .rangeBands([bottom_margin, h - top_margin], .5),    //segment y direction into data.length peices
+        color = function(id) { return '#00b3dc' };
+
+    var chart_top = h - y.rangeBand()/2 - top_margin;
+    var chart_bottom = y.rangeBand()/2;
+    var chart_left = left_margin;
+    var chart_right = w - right_margin;
+
+/*
+    color = d3.scale.ordinal().range(color_scale);     //builtin range of colors
+    if(tween_colors){
+        color = d3.scale.log().range(color_scale);     //builtin range of colors
+    }
+*/
+
+
+    /*
+     *  Setup the SVG element and position it
+     */
+    var vis = d3.select("body")
+        .append("svg:svg")              //create the SVG element inside the <body>
+            .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+            .attr("height", h)
+        .append("svg:g")                //make a group to hold our pie chart
+            .attr("id", "barchart")
+            .attr("class", "barchart")
+
+
+    /*
+     * Draw grid lines (should be drawn under the bars)
+     */
+    var rules = vis.selectAll("g.rule")
+        .data(x.ticks(num_ticks))
+      .enter().append("svg:g")
+        .attr("transform", function(d) { return "translate(" + (chart_left + x(d)) + ",0)"; }); 
+    rules.append("svg:line")
+        .attr("class", "tick")
+        .attr("y1", chart_top)
+        .attr("y2", chart_top + 4);
+    rules.append("svg:text")
+        .attr("class", "tick_label")
+        .attr("text-anchor", "middle")
+        .attr("y", chart_top)
+        .text(function(d) { 
+            return d;
+        });                             
+    // push down our tick labels appropriate amount by height (can change with font-size)
+    var bbox = vis.selectAll(".tick_label").node().getBBox();
+    vis.selectAll(".tick_label")
+        .attr("transform", function(d) {                    //set the label's origin to the center of the arc
+        //return "translate(0," +  bbox.height / 4 + ")";
+        return "translate(0," + (bbox.height)  + ")";
+        })
+
+
+    /*
+     *  Create the bar chart
+     */
+    var bars = vis.selectAll("g.bar")       //this selects all <g> elements with class slice (there aren't any yet)
+        .data(data)                         //associate the data with svg group elements that will draw each bar
+            .enter()                        //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+            .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+                .attr("class", "bar")       //allow us to style things in the slices (like text)
+                .attr("transform", function(d, i) { return "translate(0," + y(i) + ")"; }); 
+
+    /*
+     * Draw the actual bar
+    */
+    bars.append("svg:rect")
+        .attr("x", right_margin)
+        .attr("fill", color(function(d,i) { return color(i); }))
+        .attr("stroke", color(function(d,i) { return color(i); }))
+        .attr("width", function(d) { return x(d.value); })
+        .attr("height", y.rangeBand());
+
+
+    
+    /*
+     *  Create the labels
+     */
+    //add the value label first
+   
+    var labels = vis.selectAll("g.bar")
+        .append("svg:text")
+        .attr("x", function(d) { return x(d.value) + right_margin + 10;}) 
+        .attr("class", "value")
+        .attr("text-anchor", "left")
+        .text(function(d) {
+            return "" + d.value + "%";
+        })
+
+    //center the label as best we can
+    var bbox = labels.node().getBBox();
+    vis.selectAll(".value")
+        .attr("transform", function(d) {                    //set the label's origin to the center of the arc
+        //return "translate(0," +  bbox.height / 4 + ")";
+        return "translate(0," + (y.rangeBand()/2 + bbox.height/4)  + ")";
+     });
+
+
+    //add the name of the category as a tspan
+    labels = vis.selectAll("g.bar")
+        .append("svg:text")
+            .attr("class", "label")
+            .attr("x", 0)
+            //.attr("y", y.rangeBand() / 2)
+            .attr("text-anchor", "right")
+            //get the label from our original data array
+            .text(function(d, i) { 
+                return d.label;
+                });                            
+
+    //center the label as best we can
+    bbox = labels.node().getBBox();
+    vis.selectAll(".label")
+        .attr("transform", function(d) {
+        return "translate(0," + (y.rangeBand()/2 + bbox.height/4)  + ")";
+        //return "translate(0,0)";
+     });
+
+
+    /*
+     * Rules
+     */
+    //vertical line
+    vis.append("svg:line")      
+        .attr("class", "grid_line")
+        .attr("x1", chart_left)
+        .attr("x2", chart_left)
+        .attr("y1", chart_bottom)
+        .attr("y2", chart_top)
+    //horizontal line
+    vis.append("svg:line")      
+        .attr("class", "grid_line")
+        .attr("x1", chart_left)
+        .attr("x2", chart_right)
+        .attr("y1", chart_top)
+        .attr("y2", chart_top)
+
+
+
+        
+    </script>
+  </body>
+</html>
+

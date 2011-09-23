@@ -1,0 +1,14 @@
+To run this example you must setup a local web server so that the ajax requests will work.
+Your URL should look something like:
+http://localhost/advd3/map/map.html
+
+Keep in mind it references advd3/d3.js etc
+as well as advd3/map/data/enj_states_array.json
+
+The enj_states_array.json file was compiled from several sources:
+Geometry was added from: 
+the us-states.json and us-state-centroids.json files from the d3.js data folder
+
+Names, abbreviations, timezones and capitals were added from:
+http://www.tellingmachine.com/post/all-50-states-as-xml-json-csv-xls-files.aspx
+
