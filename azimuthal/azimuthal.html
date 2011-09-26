@@ -62,11 +62,6 @@ var states = d3.select("body")
   .append("svg:g")
     .attr("id", "states");
 
-var equator = d3.select("svg")
-  .append("svg:line")
-    .attr("x1", "0%")
-    .attr("x2", "100%");
-
 d3.json("../data/world-countries.json", function(collection) {
 
   states
@@ -88,10 +83,6 @@ function refresh() {
     .selectAll("path")
       .attr("d", path);
 
-  equator
-      .attr("y1", xy([0, 0])[1])
-      .attr("y2", xy([0, 0])[1])
-
   d3.select("#scale span")
       .text(xy.scale());
   d3.select("#translate-x span")
@@ -101,15 +92,15 @@ function refresh() {
 }
 
     </script><p>
-    <div id="scale">scale: <span>500</span><br></div><p>
+    <div id="scale">scale: <span>240</span><br></div><p>
     <div id="translate-x">translate.x: <span>0</span><br></div>
     <div id="translate-y">translate.y: <span>0</span><br></div>
     <script type="text/javascript">
 
 $("#scale").slider({
   min: 0,
-  max: 3000,
-  value: 500,
+  max: 1000,
+  value: 240,
   slide: function(event, ui) {
     xy.scale(ui.value);
     refresh();
