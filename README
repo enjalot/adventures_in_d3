@@ -1,0 +1,11 @@
+Tutorials and sample code using the d3.js library:
+http://mbostock.github.com/d3/
+
+by Ian 'enjalot' Johnson
+http://enja.org
+
+
+the d3/ and lib/ folders are copied from the d3.js github repository and are
+only included here to make the samples run standalone.  You should really
+replace all references to the d3 lib files with pointers to the actual d3.js
+repository either on your local machine or hosted elsewhere.

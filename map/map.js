@@ -3,7 +3,7 @@ var svg = d3.select("#chart").append("svg:svg")
     .attr("width", 960)
     .attr("height", 500);
 
-d3.json("data/enj_states_array.json", function(json) {
+d3.json("../data/enj_states_array.json", function(json) {
     var path = d3.geo.path()
         .projection(d3.geo.albersUsa());
     var project = d3.geo.albersUsa()
