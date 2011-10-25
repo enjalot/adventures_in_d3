@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+ <head>
+   <title>Pie Chart</title>
+   <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?2.3.0"></script>
+   <script type="text/javascript" src="http://mbostock.github.com/d3/d3.layout.js?2.3.0"></script>
+   <style type="text/css">
+
+body {
+ font: 10px sans-serif;
+}
+
+   </style>
+ </head>
+ <body>
+
+     <p style="font-size:36pt;">Click in the box to bake a pie!<p>
+
+   <script type="text/javascript">
+
+    var num = 7;
+    var gradient = d3.scale.linear()
+        .domain([ 0, num])
+        .interpolate(d3.interpolateRgb)
+        .range(["#00ffaa", "#ff00aa"])
+
+    function bakepie(classname, data, x, y, r)
+    { 
+        //color could be made a parameter
+        var color = d3.scale.category10()
+        var arc = d3.svg.arc()
+            .innerRadius(r*.6)
+            .outerRadius(r)
+        var donut = d3.layout.pie()
+            .sort(d3.descending);
+
+        var pie = d3.select("#charts")
+            .append("svg:g")
+                //.data([data.sort(d3.descending)])
+                .data([data])
+                .attr("class", classname);
+
+        var arcs = pie.selectAll("g.arc")
+           .data(donut)
+         .enter().append("svg:g")
+           .attr("class", "arc")
+           .attr("transform", "translate(" + x + "," + y + ")");
+
+
+        var paths = arcs.append("svg:path")
+            .attr("fill", function(d, i) { return color(i); })
+            .attr("fill-opacity", .6)
+            .attr("d", arc);
+
+        //Make sure we select our arcs int he right order
+        var selected = d3.selectAll("." + classname + " g.arc path")
+            .sort(function(a,b)
+            {
+                //console.log(a)
+                //console.log(b)
+                return d3.descending(a.value, b.value);
+            })
+        selected.attr("fill", function(d, i) { return gradient(i);})
+        
+    }
+
+
+    //setup svg canvas
+    d3.select("body")
+        .append("svg:svg")
+            .attr("width", 1000)
+            .attr("height", 700)
+            .attr("id", "charts")
+            .on("click", clickypie)
+            .append("svg:rect")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("stroke", "#000")
+                .attr("stroke-width", 3)
+                .attr("fill", "none")
+
+    count = 0
+    function clickypie()
+    {  
+        count += 1;
+        //center the py at the position of the mouse click
+        var xy = d3.svg.mouse(this);
+        //radius is random between 50 and 150
+        var r = 50 + Math.random() * 100;
+        //array of random values with num elements
+        var data = d3.range(num)
+            .map(Math.random)
+
+        bakepie("pie"+count, data, xy[0], xy[1], r);
+    };
+
+
+   
+   </script>
+ </body>
+</html>
