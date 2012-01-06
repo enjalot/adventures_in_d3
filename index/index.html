@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>2D Indexing</title>
+    <!--
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.js" type="text/javascript" charset="utf-8"></script>
+    -->
+		
+	<script src="../lib/jquery-1.6.2.min.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="../lib/jwerty.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="../d3/d3.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../d3/d3.time.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../d3/d3.layout.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../d3/d3.geom.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../d3/d3.geo.js" type="text/javascript" charset="utf-8"></script>	
+	
+	<script src="../lib/dipsy.js" type="text/javascript" charset="utf-8"></script>
+
+    <!-- tangle -->
+	<script src="../lib/TangleKit/mootools.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../lib/Tangle.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../lib/TangleKit/sprintf.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../lib/TangleKit/BVTouchable.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../lib/TangleKit/TangleKit.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="../lib/TangleKit/TangleKit.css" type="text/css" media="screen" title="no title" charset="utf-8">
+
+	<script src="index.js" type="text/javascript" charset="utf-8"></script>
+
+	<style type="text/css" media="screen">
+	body, html {
+		padding: 8px;
+		margin: 0;
+		background-color: #e7e8e9;
+		font-size: 20px;
+		font-family: Georgia, serif;
+		line-height: 1.5em;
+	}
+	#container {
+		width: 800px;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 8px;		
+	}
+	#graph {
+		margin-top: 15px;
+	}
+
+
+    .selected {
+    }
+
+	</style>
+	
+	<script type="text/javascript" charset="utf-8">
+    function setUpTangle () {
+
+        var eindex = document.getElementById("index");
+        itangle = new Tangle(eindex, {
+            initialize: function () {
+                this.tangleindex = 0;
+            },
+            update: function () {
+                update_unit_chart(this.tangleindex);
+                tx = x(this.tangleindex)
+                ty = y(this.tangleindex)
+                xtangle.setValue("tanglex", tx);
+                ytangle.setValue("tangley", ty);
+            }
+        });
+
+
+    var ex = document.getElementById("x");
+        xtangle = new Tangle(ex, {
+            initialize: function () {
+                this.tanglex = 0;
+            },
+            update: function () {
+                tx = this.tanglex
+                ty = ytangle.getValue("tangley")
+                i = ty * 10 + tx
+                itangle.setValue("tangleindex", i)
+                update_unit_chart(i);
+            }
+        });
+
+    var ey = document.getElementById("y");
+        ytangle = new Tangle(ey, {
+            initialize: function () {
+                this.tangley = 0;
+            },
+            update: function () {
+                ty = this.tangley
+                tx = xtangle.getValue("tanglex")
+                i = ty * 10 + tx
+                itangle.setValue("tangleindex", i)
+            }
+        });
+
+
+    }
+	</script>
+</head>
+<body onload="setUpTangle();">
+<div id="container">
+
+
+
+    i &nbsp;= &nbsp;y * 10 + x</br>
+    <span id="index"><span data-var="tangleindex" class="TKAdjustableNumber" data-min="0" data-max="99"></span></span>  
+    = 
+    <span id="y"><span data-var="tangley" class="TKAdjustableNumber" data-min="0" data-max="9"></span></span> * 10
+    +
+    <span id="x"><span data-var="tanglex" class="TKAdjustableNumber" data-min="0" data-max="9"></span></span>
+	
+    <div id="graph"></div>
+	
+</div>
+<script type="text/javascript" charset="utf-8">
+    var itangle = {getValue: function(){}, setValue: function(){}}; 
+    var xtangle = {getValue: function(){}, setValue: function(){}}; 
+    var ytangle = {getValue: function(){}, setValue: function(){}}; 
+    var oldindex = 0;
+    make_unit_chart(oldindex);
+</script>
+
+<script type="text/javascript" charset="utf-8">
+
+	
+</script>
+</body>
+</html>
