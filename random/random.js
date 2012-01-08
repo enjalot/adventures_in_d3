@@ -117,7 +117,8 @@ var xm = function(d,i)
 
 
 //var easings = ["linear", "exp", "quad", "sin", "bounce", "circle", "cubic"]
-var easings = ["linear", "sin", "bounce", "bounce","bounce"]
+//var easings = ["linear", "sin", "bounce", "bounce","bounce"]
+var easings = ["linear", "sin"]//, "bounce", "bounce","bounce"]
 
 var update_dots = function(classname)
 {
