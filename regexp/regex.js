@@ -6,7 +6,7 @@ wait = 700;
 
 var n = 10;
 tests = [ "-1.5", "0", "42", "+50.00" , "-.2", ".5" ]
-regex = [ "[+-]?", "\\d*", "(\\.\\d+)?", "([eE][+-]?\\d+)?" ]
+regex = [ "[+-]?", "\\d*", "(\\.\\d+)?", ["([eE]", "[+-]?", "\\d+)?"] ]
 numbers = []
 numbers.push( [ "-", "1", ".5", "" ])
 numbers.push( [ "", "0", "", "" ])
@@ -14,17 +14,15 @@ numbers.push( [ "", "42", "", "" ])
 numbers.push( [ "+", "50", ".00", "" ])
 numbers.push( [ "-", "", ".2", "" ])
 numbers.push( [ "", "", ".5", "" ])
-numbers.push( [ "-", "1", ".565", "e-13" ])
-numbers.push( [ "", "6", "", "E13" ])
+numbers.push( [ "-", "1", ".565", ["e", "-", "13"]])
+numbers.push( [ "", "6", "", ["E", "", "13"]])
 
-/*
-var color = d3.scale.linear()
-    .domain([0, regex.length])
+var range_color = d3.scale.linear()
+    .domain([0, 3])
     .interpolate(d3.interpolateRgb)
-    .range(['#f00', '#0f0'])
-*/
+    .range(['#96b1d5', '#ef2929'])
 
-var colors = [ '#fff', '#f00', '#0f0', '#af6', '#66e', '#999']
+var colors = [ '#d3d7cf', '#8ae234', '#fce94f']//, '#999'] '#eeeeec', '#ad7fa8', '#8ae234'
 var color = function(i) 
 {
     return colors[i]
@@ -69,16 +67,37 @@ make_radial(wrid, c, c, gr, "#fff", .2)
 svg.append("svg:rect")
     .attr("width", w)
     .attr("height", h)
-    .attr("fill", "#004")
+    .attr("fill", "#2f2f2f")
+/*
 svg.append("svg:rect")
     .attr("class", "background_rect")
     .attr("width", w)
     .attr("height", h)
     .attr("stroke", "none")
     .attr("fill", "url(#" + wrid + ")")
+    .attr("fill-opacity", .3)
+*/
 
 var vis = svg.append("svg:g")
     .attr("class", "vis")
+
+var make_inner = function(d,i) {
+    if(typeof(d) === "string")
+    {
+        d3.select(this).text(d);
+    }
+    else
+    {
+        d3.select(this.parentNode)
+            .selectAll("tspan.inner")
+            .data(d)
+            .enter()
+            .append("svg:tspan")
+                .text(function(e,j){return e;})
+                .attr("fill", function(e,j) {return range_color(j)})
+    }
+            
+}
 
 var regext = vis.append("svg:text")
     .attr("transform", "translate(" + [w / 2, 100] + ")")
@@ -88,7 +107,8 @@ var regext = vis.append("svg:text")
     .data(regex)
     .enter()
     .append("svg:tspan")
-        .text(function(d,i) {return d})
+    .attr("class", "regex")
+        .each(make_inner)
         .attr("fill", function(d,i) {return color(i)})
         .attr("dx", ".25em")
 
@@ -119,12 +139,9 @@ var make_numbers = function(classname, data)
                      .data(dnumber)
                 .enter()
                     .append("svg:tspan")
-                        .text(function(d,i) {
-                            console.log("d", d);
-                            return d
-                        })
+                        .each(make_inner)
                         .attr("fill", function(d,i) {
-                            console.log("color",i, color(i));
+                            //console.log("color",i, color(i));
                             return color(i)
                         })
                         .attr("dx", ".25em")
