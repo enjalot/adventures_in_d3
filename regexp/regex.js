@@ -4,18 +4,18 @@ var h = 500
 
 wait = 700;
 
-var n = 10;
 tests = [ "-1.5", "0", "42", "+50.00" , "-.2", ".5" ]
 regex = [ "[+-]?", "\\d*", "(\\.\\d+)?", ["([eE]", "[+-]?", "\\d+)?"] ]
 numbers = []
-numbers.push( [ "-", "1", ".5", "" ])
-numbers.push( [ "", "0", "", "" ])
+numbers.push( [ "-", "1", ".5654", ["e", "-", "13"]])
+numbers.push( [ "+", "6", ".42", ["e", "", "3"]])
+numbers.push( [ "", "2", ".34", ["e", "", "2"]])
+numbers.push( [ "-", "100", ".5", "" ])
 numbers.push( [ "", "42", "", "" ])
-numbers.push( [ "+", "50", ".00", "" ])
+numbers.push( [ "", "0", ".5", "" ])
 numbers.push( [ "-", "", ".2", "" ])
 numbers.push( [ "", "", ".5", "" ])
-numbers.push( [ "-", "1", ".565", ["e", "-", "13"]])
-numbers.push( [ "", "6", "", ["E", "", "13"]])
+numbers.push( [ "", "0", "", "" ])
 
 var range_color = d3.scale.linear()
     .domain([0, 3])
@@ -30,7 +30,7 @@ var color = function(i)
 
 var translate = function(d,i)
 {
-    return "translate(" + [w / 2, 150 + i * 40 ] + ")";
+    return "translate(" + [w / 2, 125 + i * 40 ] + ")";
 }
 
 var svg = d3.select("svg")
@@ -95,12 +95,13 @@ var make_inner = function(d,i) {
             .append("svg:tspan")
                 .text(function(e,j){return e;})
                 .attr("fill", function(e,j) {return range_color(j)})
+                .attr("dx", ".25em")
     }
             
 }
 
 var regext = vis.append("svg:text")
-    .attr("transform", "translate(" + [w / 2, 100] + ")")
+    .attr("transform", "translate(" + [w / 2, 75] + ")")
     .attr("text-anchor", "middle")
     .attr("font-size", 40)
     .selectAll("tspan.regex")
