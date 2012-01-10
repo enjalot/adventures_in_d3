@@ -37,10 +37,12 @@ var m = 70;
 
 for (i in d3.range(n))
 {
+    /*
     if(i < 3)
         var speed = (i-3) * 1e-2;
     else
         var speed = (i-2) * 1e-2;
+    */
     //var speed = 50e-2 / (i + 1)
     //var speed = .001 *  n / (.5*i+1)
     var speed = .001 * i * 4;
@@ -63,9 +65,10 @@ var xscale = d3.scale.linear()
     .range([0, w])
 
 var omega = -.22
-function line_maker( data, speed )
+function line_maker( data, time)
 {
-    var freq = Math.PI*.4 + 3 * omega * data.index // * 3000
+    var speed = .08 * sm * time;// + data.index
+    var freq = 3 * omega * data.index
     var svgline = d3.svg.line()
     .x(function(d,i)
     {
@@ -73,13 +76,16 @@ function line_maker( data, speed )
     })
     .y(function(d,i)
     {
-        var theta = freq * d/m * Math.PI * 4 
+        //var theta = d/m * Math.PI * 4 
+        var theta = d/m * Math.PI * 2 
+        var phase = (n-data.index) * speed * .01
+        var y = data.height * Math.sin(freq * theta + phase );
         //console.log("sin", Math.sin(theta), d)
-        var y = data.height * (Math.sin(theta + (n-data.index) * .1 * speed * .18 ));
         //console.log ("y", y)
         return y
     })
     .interpolate("basis")
+    //.interpolate("linear")
     return svgline(data.data);
 }
 
@@ -180,6 +186,16 @@ var opacity = d3.scale.linear()
     .domain([0, n])
     .range([1, .4])
 
+//var freq = Math.PI*.4 + 3 * omega * data.index // * 3000
+//var theta = freq * d/m * Math.PI * 4 
+//freq: 
+//d, m: 
+
+//var speed = .001 * i * 4;
+//var p = (n-data.index) * .1 * speed * .18
+//var y = data.height * (Math.sin(theta + p));
+
+//y = A * sin( B * theta + p)
 
 b = 1;
 d3.timer(function() {
@@ -187,16 +203,11 @@ d3.timer(function() {
   var elapsed = Date.now() - start
   var damp = .3
 
-  rotate = function(d,i) { 
-  var speed = sm * d.speed * elapsed * .1
-    return "rotate(" + speed + ")"; 
-  };
-
   line = d3.selectAll("g.line path")
       .attr("d", function(d,i) {
-             //var speed = a * d.speed * elapsed + .01 * d.index
-             var speed = sm * .08 * elapsed + d.index * 4 
-             return line_maker( d, speed ) 
+            //var speed = a * d.speed * elapsed + .01 * d.index
+            
+            return line_maker( d, elapsed) 
         })
       .attr("stroke-opacity", function(d,i) { return opacity(d.index);})
       //.attr("stroke", function(d,i) { return color(d.index);})
