@@ -2,6 +2,7 @@
     float:left;
     position:relative;
     overflow: hidden;
+    border:none;
 }
 
 #iframes {

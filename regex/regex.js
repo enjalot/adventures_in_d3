@@ -1,5 +1,5 @@
 
-var w = 600
+var w = 700
 var h = 500
 
 wait = 700;
@@ -7,7 +7,7 @@ wait = 700;
 tests = [ "-1.5", "0", "42", "+50.00" , "-.2", ".5" ]
 regex = [ "[+-]?", "\\d*", "(\\.\\d+)?", ["([eE]", "[+-]?", "\\d+)?"] ]
 numbers = []
-numbers.push( [ "-", "1", ".5654", ["e", "-", "13"]])
+numbers.push( [ "", "8", ".31432", ["e", "-", "3"]])
 numbers.push( [ "+", "6", ".42", ["e", "", "3"]])
 numbers.push( [ "", "2", ".34", ["e", "", "2"]])
 numbers.push( [ "-", "100", ".5", "" ])
@@ -16,6 +16,25 @@ numbers.push( [ "", "0", ".5", "" ])
 numbers.push( [ "-", "", ".2", "" ])
 numbers.push( [ "", "", ".5", "" ])
 numbers.push( [ "", "0", "", "" ])
+
+
+var update_fonts = function()
+{
+    d3.selectAll("text")
+        .attr("font-family", font)
+        .attr("font-size", font_size);
+}
+var fi = 0;
+var fonts = ["Courier New", "Verdana", "Fredericka the Great", "Quantico", "Overlock SC"];
+var font_size = 30;
+var font = fonts[fi];
+jwerty.key('f', function () { 
+    fi += 1;
+    if(fi >=fonts.length) fi = 0;
+    font = fonts[fi];
+    update_fonts();
+});
+
 
 var range_color = d3.scale.linear()
     .domain([0, 3])
@@ -103,7 +122,6 @@ var make_inner = function(d,i) {
 var regext = vis.append("svg:text")
     .attr("transform", "translate(" + [w / 2, 75] + ")")
     .attr("text-anchor", "middle")
-    .attr("font-size", 40)
     .selectAll("tspan.regex")
     .data(regex)
     .enter()
@@ -132,7 +150,6 @@ var make_numbers = function(classname, data)
           
     cnums = gnums.append("svg:text")
         .attr("text-anchor", "middle")
-        .attr("font-size", 40)
         .each(function(dnumber,i) {
             console.log("dnumber", dnumber)
             d3.select(this)
@@ -147,7 +164,8 @@ var make_numbers = function(classname, data)
                         })
                         .attr("dx", ".25em")
         })
-     
+
+    update_fonts();
 }
 
 

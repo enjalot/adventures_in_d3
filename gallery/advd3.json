@@ -28,5 +28,12 @@
         "url": "../index/index.html",
         "width": 540,
         "height": 500
+    },
+    {
+        "htmlid": "regex",
+        "url": "../regex/index.html",
+        "width": 700,
+        "height": 500
     }
+
 ]
