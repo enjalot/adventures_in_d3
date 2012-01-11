@@ -18,15 +18,15 @@ function clicker(d, i)
 function make_unit_chart(index){
     color0 = "#5885f5"
     color1 = "#999"
-    var h = 560,
-        w = 500;
+    var w = 500,
+        h = 500;
 
     var data = d3.range(100);
 
     var canvas = d3.select("#graph")
         .append("svg:svg")
-            .attr("height", h)
             .attr("width", w)
+            .attr("height", h)
         .append("svg:g")
             .attr("id", "graph");
 

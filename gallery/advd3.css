@@ -1,0 +1,32 @@
+.iframe {
+    float:left;
+    position:relative;
+    overflow: hidden;
+}
+
+#iframes {
+    width:5000px;
+    overflow: scroll;
+}
+
+#descriptions {
+
+}
+
+#index {
+}
+
+#sinwaves {
+    float:left;
+    position:relative;
+}
+
+#random {
+    float:left;
+    position:relative;
+}
+#squarecircle {
+    float:left;
+    position:relative;
+}
+

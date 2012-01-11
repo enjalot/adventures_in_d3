@@ -4,18 +4,10 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <style type="text/css">
 
-body {
-  background: #333;
+body, html {
+    background: #333;
+    margin: 0px !important;
 }
-
-rect {
-  stroke-width: 2.5px;
-}
-
-/*
-.square:nth-child(2n + 1) rect {
-}
-*/
 
     </style>
   </head>
@@ -25,7 +17,7 @@ rect {
     <script type="text/javascript" src="../lib/jwerty.js"></script>
     <script type="text/javascript">
 
-var w = 960,
+var w = 950,
     h = 500,
     start = Date.now();
 
@@ -37,14 +29,6 @@ var m = 70;
 
 for (i in d3.range(n))
 {
-    /*
-    if(i < 3)
-        var speed = (i-3) * 1e-2;
-    else
-        var speed = (i-2) * 1e-2;
-    */
-    //var speed = 50e-2 / (i + 1)
-    //var speed = .001 *  n / (.5*i+1)
     var speed = .001 * i * 4;
 
     var data = d3.range(m) 
@@ -62,7 +46,7 @@ for (i in d3.range(n))
 
 var xscale = d3.scale.linear()
     .domain([0,m])
-    .range([0, w])
+    .range([0, w+30])
 
 var omega = -.22
 function line_maker( data, time)
@@ -100,7 +84,7 @@ function lineEnter(d, i) {
       .attr("class", "path")
       //.attr("transform", function(_, i) { return "translate(" + [0, h - spacing * d.index] + ")"; })
     .attr("d", function(d,i) {
-              return line_maker( d, 0 ) 
+              //return line_maker( d, 5000 ) 
             }
         )
       .attr("stroke-width", function(e,i) { return e.width;})
@@ -132,7 +116,7 @@ jwerty.key('d', function () {
     console.log("omega", omega)
 });
 
-var pause = false;
+var pause = true;
 jwerty.key('p', function () { 
     pause = !pause;
 });
@@ -147,7 +131,7 @@ function update_spacing()
         .range([0, h])
 
     //console.log("th", th, hscale(99))
-    console.log("spacing", spacing)
+    //console.log("spacing", spacing)
     d3.selectAll("g.line path")
         .attr("transform", function(d, i) { 
             //console.log("h",h, spacing, d.index);
@@ -197,6 +181,15 @@ var opacity = d3.scale.linear()
 
 //y = A * sin( B * theta + p)
 
+  
+d3.selectAll("g.line path") 
+    .attr("d", function(d,i) {
+        return line_maker( d, 14000) 
+    })
+    .attr("stroke", function(d,i) { return color(d.index);})
+
+
+
 b = 1;
 d3.timer(function() {
   if(pause) return false;
@@ -205,8 +198,6 @@ d3.timer(function() {
 
   line = d3.selectAll("g.line path")
       .attr("d", function(d,i) {
-            //var speed = a * d.speed * elapsed + .01 * d.index
-            
             return line_maker( d, elapsed) 
         })
       .attr("stroke-opacity", function(d,i) { return opacity(d.index);})

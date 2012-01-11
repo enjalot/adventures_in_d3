@@ -2,6 +2,13 @@
 var w = 600
 var h = 500
 
+var pause = true;
+jwerty.key('p', function () { 
+    pause = !pause;
+});
+
+
+
 wait = 700;
 
 var n = 100;
@@ -71,13 +78,13 @@ var c = { "x": .5, "y": .5 };
 make_radial(wrid, c, c, gr, "#fff", .2)
     
 svg.append("svg:rect")
-    .attr("width", w)
-    .attr("height", h)
+    .attr("width", "100%")
+    .attr("height", "100%")
     .attr("fill", "#004")
 svg.append("svg:rect")
     .attr("class", "background_rect")
-    .attr("width", w)
-    .attr("height", h)
+    .attr("width", "100%")
+    .attr("height", "100%")
     .attr("stroke", "none")
     .attr("fill", "url(#" + wrid + ")")
 
@@ -160,6 +167,7 @@ make_dots("dots2", dots2);
 
 time = new Date()
 d3.timer(function() {
+    if(pause) return false;
     now = new Date();
     dt = now - time
     if(dt > wait)

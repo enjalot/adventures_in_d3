@@ -1,12 +1,14 @@
 //http://stackoverflow.com/questions/5055625/image-warping-bulge-effect-algorithm
 
-n = 10
+n = 20 
 //.1 is interesting, 1,1
 k = .8
-jwerty.key('←', function () { 
+//jwerty.key('←', function () { 
+jwerty.key('a', function () { 
     k -= .01;
 });
-jwerty.key('→', function () { 
+//jwerty.key('→', function () { 
+jwerty.key('d', function () { 
     k += .01;
 });
 
@@ -58,36 +60,43 @@ function y(i) {
 
 function clicker(d, i)
 {
+    /*
     itangle.setValue("tangleindex", d);
     xtangle.setValue("tanglex", x(d));
     ytangle.setValue("tangley", y(d));
+    */
     update_unit_chart(d)
 }
 
 function make_unit_chart(index){
-    color0 = "#5885f5"
-    color1 = "#999"
-    var h = 560,
-        w = 500;
+    //color0 = "#5885f5"
+    //color1 = "#999"
+    var color0 = "#000"
+    var color1 = "#000"
+    var corners = 5
+ 
+    var w = 500,
+        h = 560
 
-    var data = d3.range(100);
+    var data = d3.range(n*n);
 
     var canvas = d3.select("#graph")
         .append("svg:svg")
-            .attr("height", h)
             .attr("width", w)
+            .attr("height", h)
         .append("svg:g")
             .attr("id", "graph");
 
-    /*
+    
     //4*n is to give 2 pixels on each side
-    bw = (w - 6*n) / n 
+    bw = (w - 4*n) / n 
     //40 for the title
-    bh = (h - 40 - 6*n) / n
+    bh = (h - 40 - 4*n) / n
     console.log("bw, bh", bw, bh)
-    */
+    /* 
     bw = 46
     bh = 46
+    */
 
     canvas.append("svg:rect")
         .attr("class", "bgrect")
@@ -131,22 +140,24 @@ function make_unit_chart(index){
                 }
             })
             .attr("stroke-width", function(d,i) {
-                if(d == index) { return 5 }
+                //if(d == index) { return 5 }
                 return 2
             })
             .attr("rx", function(d,i) {
-                if(d == index) { return 1 }
-                return 8
+                //if(d == index) { return 1 }
+                return corners;
             })
              .attr("ry", function(d,i) {
-                if(d == index) { return 1 }
-                return 8
+                //if(d == index) { return 1 }
+                return corners;
             })
             .attr("class", "rowrect")
             .attr("width", bw)
             .attr("height", bh)
+            .attr("opacity", .5)
 
     fs = 10
+    /*
     rects.append("svg:text")
         .attr("class", "tind")
         .text(function(d,i) {
@@ -158,8 +169,6 @@ function make_unit_chart(index){
         .attr("text-anchor", "middle")
         .attr("transform", function() {
             return "translate(" + [ this.getBBox().width / 2, 0] + ")"; })
-
-
 
     rects.append("svg:text")
         .attr("class", "tx")
@@ -189,6 +198,7 @@ function make_unit_chart(index){
         .attr("transform", function() {
             return "translate(" + [ this.getBBox().width / 2, 0] + ")"; })
 
+    */
 
     canvas.append("svg:rect")
         .attr("pointer-events", "all")
@@ -245,6 +255,7 @@ function update_unit_chart(index)
         })
         
 
+    /*
     text = boxes.selectAll("text")
         .transition()
         .duration(function(d,i){
@@ -263,8 +274,9 @@ function update_unit_chart(index)
                 return "black";
             }
         })
+    */
 
-        oldindex = index; 
-        //warp_boxes(.5, .5)
+    oldindex = index; 
+    //warp_boxes(.5, .5)
 }
 
