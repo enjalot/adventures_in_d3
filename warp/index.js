@@ -76,7 +76,7 @@ function make_unit_chart(index){
     var corners = 5
  
     var w = 500,
-        h = 560
+        h = 500
 
     var data = d3.range(n*n);
 
@@ -91,7 +91,7 @@ function make_unit_chart(index){
     //4*n is to give 2 pixels on each side
     bw = (w - 4*n) / n 
     //40 for the title
-    bh = (h - 40 - 4*n) / n
+    bh = (h - 4*n) / n
     console.log("bw, bh", bw, bh)
     /* 
     bw = 46
