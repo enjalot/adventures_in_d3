@@ -8,13 +8,14 @@ tests = [ "-1.5", "0", "42", "+50.00" , "-.2", ".5" ]
 regex = [ "[+-]?", "\\d*", "(\\.\\d+)?", ["([eE]", "[+-]?", "\\d+)?"] ]
 numbers = []
 numbers.push( [ "", "8", ".31432", ["e", "-", "3"]])
-numbers.push( [ "+", "6", ".42", ["e", "", "3"]])
-numbers.push( [ "", "2", ".34", ["e", "", "2"]])
-numbers.push( [ "-", "100", ".5", "" ])
+numbers.push( [ "", "6", ".674", ["e", "-", "11"]])
+numbers.push( [ "+", "1", "", ["e", "", "100"]])
+numbers.push( [ "", "4", ".6692", "" ])
+numbers.push( [ "-", "2", ".7182818284", "" ])
+numbers.push( [ "-", "3", ".14159265358979", "" ])
+numbers.push( [ "", "2", ".5029", "" ])
+numbers.push( [ "", "1", ".618", "" ])
 numbers.push( [ "", "42", "", "" ])
-numbers.push( [ "", "0", ".5", "" ])
-numbers.push( [ "-", "", ".2", "" ])
-numbers.push( [ "", "", ".5", "" ])
 numbers.push( [ "", "0", "", "" ])
 
 
@@ -24,10 +25,12 @@ var update_fonts = function()
         .attr("font-family", font)
         .attr("font-size", font_size);
 }
+
 var fi = 0;
 var fonts = ["Courier New", "Verdana", "Fredericka the Great", "Quantico", "Overlock SC"];
 var font_size = 30;
 var font = fonts[fi];
+
 jwerty.key('f', function () { 
     fi += 1;
     if(fi >=fonts.length) fi = 0;
@@ -49,7 +52,7 @@ var color = function(i)
 
 var translate = function(d,i)
 {
-    return "translate(" + [w / 2, 125 + i * 40 ] + ")";
+    return "translate(" + [w / 2, 100 + i * 40 ] + ")";
 }
 
 var svg = d3.select("svg")
@@ -120,7 +123,7 @@ var make_inner = function(d,i) {
 }
 
 var regext = vis.append("svg:text")
-    .attr("transform", "translate(" + [w / 2, 75] + ")")
+    .attr("transform", "translate(" + [w / 2, 50] + ")")
     .attr("text-anchor", "middle")
     .selectAll("tspan.regex")
     .data(regex)

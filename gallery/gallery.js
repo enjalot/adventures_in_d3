@@ -16,8 +16,8 @@ gallery.Exhibit = (function() {
   Exhibit.prototype.defaults = {
     htmlid: 'index',
     url: '../index/index.html',
-    width: 560,
-    height: 700
+    width: 500,
+    height: 540
   };
   return Exhibit;
 })();
@@ -48,10 +48,11 @@ gallery.ExhibitView = (function() {
 json_url = "advd3.json";
 init = function() {
   return d3.json(json_url, function(data) {
-    var exhibits;
+    var exhibits, sum;
     exhibits = new gallery.Exhibits(data);
     console.log("exhibits", exhibits);
-    return exhibits.each(function(ex) {
+    sum = 0;
+    exhibits.each(function(ex) {
       var ev, id, iframe;
       id = ex.get("htmlid");
       iframe = $('<iframe id="' + id + '"></iframe>');
@@ -62,8 +63,11 @@ init = function() {
         id: id,
         el: iframe
       });
-      return ev.render();
+      ev.render();
+      return sum += ex.get("width");
     });
+    console.log("sum", sum);
+    return d3.select("#iframes").style("width", sum + 35);
   });
 };
 init();

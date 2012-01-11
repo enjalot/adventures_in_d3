@@ -4,8 +4,8 @@ class gallery.Exhibit extends Backbone.Model
     defaults:
         htmlid: 'index'
         url: '../index/index.html'
-        width: 560
-        height: 700
+        width: 500
+        height: 540
 
 class gallery.Exhibits extends Backbone.Collection
     model: gallery.Exhibit
@@ -29,6 +29,8 @@ init = () ->
         #exhibits.add( new gallery.Exhibit() )
         console.log "exhibits", exhibits
 
+        sum = 0
+        
         exhibits.each((ex) ->
             id = ex.get("htmlid")
             iframe = $('<iframe id="' + id + '"></iframe>')
@@ -38,7 +40,10 @@ init = () ->
 
             ev = new gallery.ExhibitView(model: ex, id: id, el: iframe)
             ev.render()
+            sum += ex.get("width")
         )
+        console.log("sum", sum)
+        d3.select("#iframes").style("width", sum + 35)
 
     )
 
