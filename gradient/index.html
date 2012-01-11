@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<!--
+    Column chart with gradients
+-->
+<html>
+  <head>    
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Gradient Column</title>
+
+
+    <script type="text/javascript" src="../d3/d3.js"></script>
+    <script type="text/javascript" src="../d3/d3.geom.js"></script>
+    <script type="text/javascript" src="../d3/d3.layout.js"></script>
+
+    <style>
+        body, html {
+        margin: 0px !important;
+        }
+    </style>
+
+  </head>
+  <body>
+
+    <style type="text/css">
+
+    </style>
+
+
+    <script type="text/javascript">
+
+    var data = [{"label":"1990", "value":16}, 
+            {"label":"1991", "value":56}, 
+            {"label":"1992", "value":7},
+            {"label":"1993", "value":77},
+            {"label":"1994", "value":22},
+            {"label":"1995", "value":16},
+            {"label":"1996", "value":66},
+            {"label":"1997", "value":33},
+            {"label":"1998", "value":90},
+            {"label":"1999", "value":85},
+            ];
+
+    //maximum of data you want to use
+    var data_max = 100;
+   
+
+    var svgw = 500;
+    var svgh = 500;
+    var w = 400;
+    var h = 400;
+    var y = d3.scale.linear()
+            .domain([0, data_max])
+            .range([0, h]);
+    var x = d3.scale.ordinal()
+                .domain(d3.range(data.length))
+                .rangeBands([0, w], .2);
+    
+    //
+    //  Setup the SVG element and position it
+    // 
+    var svg = d3.select("body")
+        .append("svg:svg")
+            .attr("width", svgw)
+            .attr("height", svgh)
+
+    var defs = svg.append("svg:defs");
+
+    
+    var wlid = "white_linear";
+    p1 = { "x": 0, "y": 0 };
+    //p2 = { "x": "100%", "y": "100%" };
+    p2 = { "x": 1, "y": 1 };
+    make_linear(wlid, p1, p2, "#fff", .8)
+    var blid = "black_linear";
+    p1 = { "x": .5, "y": 1 };
+    p2 = { "x": .5, "y": 0 };
+    make_linear(blid, p1, p2, "#000", .3)
+
+    var wrid = "white_radial";
+    r = .5;
+    c = { "x": .5, "y": .5 };
+    //f = { "x": "50%", "y": "50%" };
+    make_radial(wrid, c, c, r, "#fff", .5)
+    crid = "color_radial";
+    c = { "x": .5, "y": .5 };
+    r = .75;
+    make_radial(crid, c, c, r, "#004", .6)
+
+    //Setup the background
+    svg.append("svg:rect")
+        .attr("class", "background_rect")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("stroke", "none")
+        .attr("fill", "#002")
+        //.attr("fill", "url(#" + wrid + ")")
+
+
+    svg.append("svg:rect")
+        .attr("class", "background_rect")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("stroke", "none")
+        //.attr("fill", "#004")
+        .attr("fill", "url(#" + crid + ")")
+
+    var move_gradients = function(x1, y1)
+    {
+        //scale mouse coordinates to [0, 1] and use that to move the centers
+        x = x1/svgw;
+        y = y1/svgh;
+        //console.log("x, y", x, y)
+        //hard coding for radial gradient for now
+        defs.select("#" + wrid)
+            .attr("cx", x)
+            .attr("cy", y)
+            .attr("fx", x)
+            .attr("fy", y)
+
+    }
+
+    var color = function(id) { return '#00b3dc' };
+    var color = d3.scale.category10();
+    make_bar("col1", 50, 30, color);
+    //make_bar("col2", 60 + w, 30, color);
+
+    svg.on("mousemove", function(d,i) {
+            //console.log("this", this, d3.svg.mouse(this))
+            x1 = d3.svg.mouse(this)[0]
+            y1 = d3.svg.mouse(this)[1]
+            move_gradients(x1, y1)
+        })
+
+
+
+
+
+
+    //
+    // These functions create the svg gradient elements in the <defs> object
+    //
+    function make_linear(id, p1, p2, color, opacity)
+    {
+        var gradient = defs.append("svg:linearGradient")
+            .attr("id", id)
+            .attr("x1", p1.x)
+            .attr("y1", p1.y)
+            .attr("x2", p2.x)
+            .attr("y2", p2.y)
+        gradient.append("svg:stop")
+            .attr("offset", "0%")
+            .attr("stop-color", color)
+            .attr("stop-opacity", opacity)
+            .attr("class", "stop0")
+        gradient.append("svg:stop")
+            .attr("offset", "50%")
+            .attr("stop-color", color)
+            .attr("stop-opacity", 1e-6)
+            .attr("class", "stop1")
+    }
+    function make_radial(id, c, f, r, color, opacity)
+    {
+        var gradient = defs.append("svg:radialGradient")
+            .attr("id", id)
+            .attr("cx", c.x)
+            .attr("cy", c.y)
+            .attr("fx", f.x)
+            .attr("fy", f.y)
+            .attr("r", r)
+        gradient.append("svg:stop")
+            .attr("offset", "0%")
+            .attr("stop-color", color)
+            .attr("stop-opacity", opacity)
+            .attr("class", "stop0")
+        gradient.append("svg:stop")
+            .attr("offset", "100%")
+            .attr("stop-color", color)
+            .attr("stop-opacity", 1e-6)
+            .attr("class", "stop1")
+    }
+
+
+
+    function make_bar(classname, tx, ty, color)
+    {
+        console.log("tx,ty", tx,ty)
+        var vis = svg.append("svg:g")                //make a group to hold our bar chart
+                .attr("id", classname)
+                .attr("class", classname)
+                .attr("transform", "translate(" + [tx,ty] + ")");
+
+
+        /*
+         *  Create the bar chart
+         */
+        var bars = vis.selectAll("g.bar")       //this selects all <g> elements with class slice (there aren't any yet)
+            .data(data)                         //associate the data with svg group elements that will draw each bar
+                .enter()                        //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+                .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+                    .attr("class", "bar")       //allow us to style things in the slices (like text)
+                    .attr("transform", function(d, i) { return "translate(" + [x(i), 0] + ")"; }); 
+
+        /*
+         * Draw the actual bar
+        */
+        bars.append("svg:rect")
+            .attr("class", "fill")
+            .attr("y", function(d) { return h-y(d.value); })
+            .attr("height", function(d) { return y(d.value); })
+            .attr("width", x.rangeBand())
+            //.attr("stroke", function(d,i) { return color(i); })
+            //.attr("stroke-width", 4)
+            .attr("fill", function(d,i) { return color(i); })
+
+
+        /*
+         * overlay clipped gradient
+         * 
+         * We make a clipppath mimicking our actual bars, but we need to transform them using the same transformation 
+         * done to the base group. we then generate a rectangle with the gradient we want.
+         * 
+        */
+        cpid = "cp" + classname
+        cp = vis.append("svg:clipPath")
+            .attr("id", cpid);
+        cp.selectAll("rect")
+            .data(data).enter()
+        .append("svg:rect")
+            .attr("class", "fill")
+            .attr("y", function(d) { return h-y(d.value); })
+            .attr("height", function(d) { return y(d.value); })
+            .attr("width", x.rangeBand())
+            .attr("transform", function(d, i) { return "translate(" + [x(i), 0] + ")"; }); 
+ 
+
+        vis.append("svg:rect")
+            .attr("class", "overlay")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("stroke", "none")
+            .attr("fill", "url(#" + wrid + ")")
+            .attr("clip-path", "url(#" + cpid + ")")
+        vis.append("svg:rect")
+            .attr("class", "overlay")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("stroke", "none")
+            .attr("fill", "url(#" + blid + ")")
+            .attr("clip-path", "url(#" + cpid + ")")
+
+
+        }
+
+        
+    </script>
+  </body>
+</html>
+

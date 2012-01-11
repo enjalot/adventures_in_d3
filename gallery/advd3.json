@@ -18,6 +18,12 @@
         "height": 500
     },
     {
+        "htmlid": "gradient",
+        "url": "../gradient/index.html",
+        "width": 500,
+        "height": 500
+    },
+    {
         "htmlid": "warp",
         "url": "../warp/index.html",
         "width": 500,
@@ -29,5 +35,4 @@
         "width": 700,
         "height": 500
     }
-
 ]
