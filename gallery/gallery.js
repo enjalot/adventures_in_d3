@@ -9,6 +9,7 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
 }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 gallery = {};
 gallery.events = _.extend({}, Backbone.Events);
+gallery.scrollorama = {};
 gallery.Exhibit = (function() {
   __extends(Exhibit, Backbone.Model);
   function Exhibit() {
@@ -52,7 +53,8 @@ gallery.ExhibitView = (function() {
   ExhibitView.prototype.render = function() {
     $(this.el).attr("src", this.model.get("url"));
     $(this.el).attr("width", this.model.get("width"));
-    return $(this.el).attr("height", this.model.get("height"));
+    $(this.el).attr("height", this.model.get("height"));
+    return this;
   };
   return ExhibitView;
 })();
@@ -64,28 +66,33 @@ init = function() {
     console.log("exhibits", exhibits);
     sum = 0;
     exhibits.each(function(ex) {
-      var ev, id, iframe, letter, pkey, ukey, _i, _len;
+      var div, ev, ew, id, iframe, letter, pkey, sdiv, ukey, _i, _len;
       id = ex.get("htmlid");
-      iframe = $('<iframe id="' + id + '"></iframe>');
-      console.log("iframe", iframe);
-      $('#iframes').append(iframe);
-      pkey = "";
-      ukey = "";
+      div = $('<div id="div' + id + '"><iframe id="' + id + '"></iframe></div>');
+      $('#iframes').append(div);
+      iframe = $('#' + id);
+      pkey = "p";
+      ukey = "u";
       for (_i = 0, _len = id.length; _i < _len; _i++) {
         letter = id[_i];
         pkey += "," + letter;
         ukey += "," + letter;
       }
-      pkey += "p";
-      console.log("KEY", pkey, ukey);
-      jwerty.key(ukey, function() {
-        console.log("unpause", id);
-        return ex.trigger("unpause");
-      });
       jwerty.key(pkey, function() {
         console.log("pause", id);
         return ex.trigger("pause");
       });
+      jwerty.key(ukey, function() {
+        console.log("unpause", id);
+        return ex.trigger("unpause");
+      });
+      div = $('#div' + id);
+      div.attr("style", "position: absolute; margin-top: 0px; margin-left: " + sum + "px;");
+      ew = ex.get("width");
+      sdiv = $('<div id="scroll_div_' + id + '"> </div>');
+      sdiv.attr("style", "display:block;position:absolute;margin-top:0; margin-left: " + (sum - 2 * ew / 3) + "px;height:1px; width:" + ew / 2);
+      sdiv.attr("class", "scrollblock");
+      $('#scrolldivs').append(sdiv);
       ev = new gallery.ExhibitView({
         model: ex,
         id: id,
@@ -95,7 +102,21 @@ init = function() {
       return sum += ex.get("width");
     });
     console.log("sum", sum);
-    return d3.select("#iframes").style("width", sum + 35);
+    d3.select("#iframes").style("width", sum + 35);
+    "sum = 0\nexhibits.each((ex) ->\n    id = ex.get(\"htmlid\")\n    div = $('#div' + id)\n    div.attr(\"style\", \"position:absolute;margin-top:0; margin-left: \" + (sum) + \"px;\")\n    sum += ew\n)";
+    gallery.scrollorama = $.scrollorama({
+      blocks: '.scrollblock'
+    });
+    "gallery.scrollorama.animate('#random',{\n    duration:800\n    #pin: true\n    property:'width'\n    start:500\n    end:1000\n})";
+    return gallery.scrollorama.onBlockChange(function() {
+      var i;
+      i = gallery.scrollorama.blockIndex;
+      console.log("scrolled into", i);
+      exhibits.each(function(ex) {
+        return ex.trigger("pause");
+      });
+      return exhibits.at(i).trigger("unpause");
+    });
   });
 };
 init();

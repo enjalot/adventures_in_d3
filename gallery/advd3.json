@@ -1,14 +1,20 @@
 [
     {
-        "htmlid": "sinwaves",
-        "url": "../sinwaves/index.html",
-        "width": 960,
+        "htmlid": "warp",
+        "url": "../warp/index.html",
+        "width": 500,
         "height": 500
     },
     {
         "htmlid": "random",
         "url": "../random/index.html",
         "width": 600,
+        "height": 500
+    },
+    {
+        "htmlid": "sinwaves",
+        "url": "../sinwaves/index.html",
+        "width": 960,
         "height": 500
     },
     {
@@ -20,12 +26,6 @@
     {
         "htmlid": "gradient",
         "url": "../gradient/index.html",
-        "width": 500,
-        "height": 500
-    },
-    {
-        "htmlid": "warp",
-        "url": "../warp/index.html",
         "width": 500,
         "height": 500
     },

@@ -1,3 +1,10 @@
+html {
+    overflow-x: scroll; /* 2 */
+    -webkit-text-size-adjust: 100%; /* 3 */
+    -ms-text-size-adjust: 100%; /* 3 */
+}
+
+
 .iframe {
     float:left;
     position:relative;
