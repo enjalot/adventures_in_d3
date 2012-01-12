@@ -1,4 +1,5 @@
 gallery = {}
+gallery.events = _.extend({}, Backbone.Events)
 
 class gallery.Exhibit extends Backbone.Model
     defaults:
@@ -12,7 +13,14 @@ class gallery.Exhibits extends Backbone.Collection
 
 class gallery.ExhibitView extends Backbone.View
     initialize:  ->
-        console.log "init exhibit"
+        console.log "init exhibit", @id
+        @model.bind("pause", @pause)
+        @model.bind("unpause", @unpause)
+
+    pause: =>
+        document.getElementById(@id).contentWindow.pause = true
+    unpause: =>
+        document.getElementById(@id).contentWindow.pause = false
 
     render: =>
         #render iframe with url from model
@@ -37,6 +45,26 @@ init = () ->
             console.log "iframe", iframe
             $('#iframes').append(iframe)
 
+            pkey = ""
+            ukey = ""
+            for letter in id
+                pkey += "," + letter
+                ukey += "," + letter
+            pkey += "p"
+
+            console.log "KEY", pkey, ukey
+
+            jwerty.key(ukey, () ->
+                console.log "unpause", id
+                ex.trigger("unpause")
+            )
+
+            jwerty.key(pkey, () ->
+                console.log "pause", id
+                ex.trigger("pause")
+            )
+
+
 
             ev = new gallery.ExhibitView(model: ex, id: id, el: iframe)
             ev.render()
@@ -44,6 +72,8 @@ init = () ->
         )
         console.log("sum", sum)
         d3.select("#iframes").style("width", sum + 35)
+
+
 
     )
 

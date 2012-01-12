@@ -8,6 +8,7 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
   return child;
 }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 gallery = {};
+gallery.events = _.extend({}, Backbone.Events);
 gallery.Exhibit = (function() {
   __extends(Exhibit, Backbone.Model);
   function Exhibit() {
@@ -33,10 +34,20 @@ gallery.ExhibitView = (function() {
   __extends(ExhibitView, Backbone.View);
   function ExhibitView() {
     this.render = __bind(this.render, this);
+    this.unpause = __bind(this.unpause, this);
+    this.pause = __bind(this.pause, this);
     ExhibitView.__super__.constructor.apply(this, arguments);
   }
   ExhibitView.prototype.initialize = function() {
-    return console.log("init exhibit");
+    console.log("init exhibit", this.id);
+    this.model.bind("pause", this.pause);
+    return this.model.bind("unpause", this.unpause);
+  };
+  ExhibitView.prototype.pause = function() {
+    return document.getElementById(this.id).contentWindow.pause = true;
+  };
+  ExhibitView.prototype.unpause = function() {
+    return document.getElementById(this.id).contentWindow.pause = false;
   };
   ExhibitView.prototype.render = function() {
     $(this.el).attr("src", this.model.get("url"));
@@ -53,11 +64,28 @@ init = function() {
     console.log("exhibits", exhibits);
     sum = 0;
     exhibits.each(function(ex) {
-      var ev, id, iframe;
+      var ev, id, iframe, letter, pkey, ukey, _i, _len;
       id = ex.get("htmlid");
       iframe = $('<iframe id="' + id + '"></iframe>');
       console.log("iframe", iframe);
       $('#iframes').append(iframe);
+      pkey = "";
+      ukey = "";
+      for (_i = 0, _len = id.length; _i < _len; _i++) {
+        letter = id[_i];
+        pkey += "," + letter;
+        ukey += "," + letter;
+      }
+      pkey += "p";
+      console.log("KEY", pkey, ukey);
+      jwerty.key(ukey, function() {
+        console.log("unpause", id);
+        return ex.trigger("unpause");
+      });
+      jwerty.key(pkey, function() {
+        console.log("pause", id);
+        return ex.trigger("pause");
+      });
       ev = new gallery.ExhibitView({
         model: ex,
         id: id,

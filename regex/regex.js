@@ -141,7 +141,7 @@ var regext = vis.append("svg:text")
 var make_numbers = function(classname, data)
 {
 
-    console.log("data", data)
+    //console.log("data", data)
     gnums = vis.selectAll("g."+classname)
         .data(data)
     .enter()
@@ -154,7 +154,7 @@ var make_numbers = function(classname, data)
     cnums = gnums.append("svg:text")
         .attr("text-anchor", "middle")
         .each(function(dnumber,i) {
-            console.log("dnumber", dnumber)
+            //console.log("dnumber", dnumber)
             d3.select(this)
                 .selectAll("tspan")
                      .data(dnumber)
