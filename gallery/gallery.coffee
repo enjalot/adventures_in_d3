@@ -54,6 +54,10 @@ init = () ->
             #console.log "iframe", iframe
             $('#iframes').append(div)
             iframe = $('#' + id)
+            iframe.attr("marginheight",0)
+            iframe.attr("marginwidth",0)
+            iframe.attr("frameborder",0)
+            iframe.attr("scrolling","no")
 
             #you can type the p and then the id to pause it, start with u to unpause
             pkey = "p"

@@ -71,6 +71,10 @@ init = function() {
       div = $('<div id="div' + id + '"><iframe id="' + id + '"></iframe></div>');
       $('#iframes').append(div);
       iframe = $('#' + id);
+      iframe.attr("marginheight", 0);
+      iframe.attr("marginwidth", 0);
+      iframe.attr("frameborder", 0);
+      iframe.attr("scrolling", "no");
       pkey = "p";
       ukey = "u";
       for (_i = 0, _len = id.length; _i < _len; _i++) {
