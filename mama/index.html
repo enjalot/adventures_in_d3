@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Happy Birthday Mama</title>
+    <script type="text/javascript" src="../d3/d3.js"></script>
+    <script type="text/javascript" src="../d3/d3.geo.js"></script>
+    <script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+    <style type="text/css">
+
+
+svg {
+  width: 960px;
+  height: 500px;
+  border: solid 1px #ccc;
+  background: #eee;
+}
+
+div {
+  width: 960px;
+}
+
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+
+// Our projection.
+//var xy = d3.geo.mercator(),
+var xy = d3.geo.azimuthal()
+        .scale(250)
+        .origin([0,45]),
+    path = d3.geo.path().projection(xy),
+    circle = d3.geo.greatCircle()
+
+var svg = d3.select("body")
+    .append("svg:svg")
+
+var clip = svg.append("defs")
+    .append("svg:clipPath")
+    .attr("id", "text_clip")
+
+var text = clip.append("svg:text")
+    .attr("transform", "translate(210, 50)")
+    .style("fill", "white")
+    .style("font-size", "140px")
+    .style("font-family", "Arial Black")
+    //.style("font-family", "Helvetica")
+    .style("font-weight", "900")
+    //text
+    .append("tspan")
+        .text("BEST")
+        .attr("dy", ".9em")
+        .attr("x", "0")
+        .attr("kerning", "37")
+text
+    .append("tspan")
+        .text("MAMA")
+        .attr("dy", ".9em")
+        .attr("x", "0")
+        .attr("kerning", "15")
+text
+    .append("tspan")
+        .text("IN DE")
+        .attr("dy", ".9em")
+        .attr("x", "0")
+        .attr("kerning", "27")
+
+
+var overlay = svg.append("svg:g")
+    .attr("class", "overlay")
+    .attr("clip-path", "url(#text_clip)")
+
+//fill rect 
+var orect = overlay.append("svg:rect")
+    .attr("class", "overlay_rect")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .style("fill", "blue")
+    .style("fill-opacity", .2)
+    //.attr("fill", "blue")
+//map
+var states = overlay 
+    .append("svg:g")
+    .attr("id", "states")
+    //.attr("clip-path", "url(#text_clip)")
+
+
+
+var pause = false;
+var wait = 30;
+d3.json("../data/world-countries.json", function(collection) {
+  states
+    .selectAll("path")
+      .data(collection.features)
+    .enter().append("svg:path")
+      .attr("d", function(d) { return path(circle.clip(d)); })
+      //.attr("d", path)
+      //.attr("stroke", "#000")
+      //.attr("stroke-opacity", .2)
+      //.attr("stroke-width", 3)
+      .attr("fill", "#00cc00")
+      //.attr("fill", "#ffffff")
+      .attr("fill-opacity", .6)
+
+
+    var time = new Date()
+    d3.timer(function() {
+        if(pause) return false;
+        var now = new Date();
+        dt = now - time
+        if(dt > wait)
+        {
+            var translate = xy.origin();
+            translate[0] = (translate[0] + 1) % 360
+            //console.log(translate[0])
+            xy.origin(translate);
+            circle.origin(translate)
+            time = new Date();
+            refresh();
+        }
+    })
+});
+
+function refresh() {
+  states
+    .selectAll("path")
+      //.attr("d", path);
+      .attr("d", function(d) { return path(circle.clip(d)); })
+}
+
+</script>
+  </body>
+</html>
