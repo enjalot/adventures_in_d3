@@ -3,6 +3,7 @@
   <head>
     <title>SPH Fluid Layout</title>
     <script type="text/javascript" src="../d3/d3.v2.js"></script>
+    <script type="text/javascript" src="../lib/dat.gui.min.js"></script>
     <script type="text/javascript" src="sph.js"></script>
   </head>
   <body>
@@ -19,7 +20,14 @@ var w = 860,
     //nodes = d3.range(5).map(Object);
     nodes = d3.range(n).map(Object);
 
-var r = 6;
+var size = 30;
+var colors = {r: 0, g: 0, b: 255};
+var threshold = 170;
+
+var tempCanvas = document.createElement("canvas");
+var tempCtx = tempCanvas.getContext("2d");
+tempCanvas.width = w;
+tempCanvas.height = h;
 
 
 //var force = d3.layout.force()
@@ -28,6 +36,35 @@ var force = d3.layout.sph()
     .size([w, h])
     .gravity(9.8)
     .start();
+
+var datgui = new dat.GUI();
+var controls = {};
+
+
+var opts = {
+    "render":"points",
+    "gravity": 9.8,
+    "rho": 500,
+    "xsph_factor": 0.2
+    //"maxnum": 2000
+}
+
+
+datgui.add(opts, 'render', [ 'points', 'metaballs' ] );
+
+make_control("gravity", -50, 50);
+make_control("rho", 50, 2000);
+make_control("xsph_factor", 0, 1);
+//make_control("maxnum", 1, 4000);
+
+function make_control(key, min, max) {
+    controls[key] = datgui.add(opts, key, min, max);
+    controls[key].onChange(function(value) {
+       force[key](value); 
+    })
+};
+
+
 
 var canvas = d3.select("#canvas").node();
 canvas.width = w;
@@ -39,16 +76,52 @@ ctx.fillStyle = "#0000ff";
 var i = 0;
 force.on("tick", function(e) {
 
-    ctx.clearRect(0, 0, w, h);
-    for(i =0; i<nodes.length; i++) {
-        var x = Math.max(r, Math.min(w - r, nodes[i].x));
-        var y = Math.max(r, Math.min(w - r, nodes[i].y));
-        ctx.fillRect(x, y, 10, 10);
+    if(opts.render === "points") {
+        size = 5;
+        ctx.clearRect(0, 0, w, h);
+        for(i =0; i<nodes.length; i++) {
+            var x = Math.max(size, Math.min(w - size, nodes[i].x));
+            var y = Math.max(size, Math.min(w - size, nodes[i].y));
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI*2);
+            ctx.fill();
+        }
+    } else if(opts.render === "metaballs") {
+        size = 30;
+        tempCtx.clearRect(0,0,w,h);
+        //ctx.clearRect(0, 0, w, h);
+
+        for(i =0; i<nodes.length; i++) {
+            var x = Math.max(size, Math.min(w - size, nodes[i].x));
+            var y = Math.max(size, Math.min(w - size, nodes[i].y));
+
+            tempCtx.beginPath();
+            var grad = tempCtx.createRadialGradient(x, y, 1, x, y, size);
+            grad.addColorStop(0, 'rgba(' + colors.r +',' + colors.g + ',' + colors.b + ',1)');
+            grad.addColorStop(1, 'rgba(' + colors.r +',' + colors.g + ',' + colors.b + ',0)');
+            tempCtx.fillStyle = grad;
+            tempCtx.arc(x, y, size, 0, Math.PI*2);
+            tempCtx.fill();
+        }
+        metabalize();
     }
 
-    
-
 });
+
+function metabalize(){
+    var imageData = tempCtx.getImageData(0,0,w,h),
+        pix = imageData.data;
+    
+    for (var i = 0, n = pix.length; i <n; i += 4) {
+        if(pix[i+3]<threshold){
+           pix[i+3]/=6;
+            if(pix[i+3]>threshold/4){
+                pix[i+3]=0;
+            }
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);    
+}
 
 //d3.select("#start").on("click", function() 
 function start()

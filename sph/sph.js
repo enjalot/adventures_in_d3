@@ -106,12 +106,12 @@ d3.layout.sph = function() {
         pi.xsph.x = 0;
         pi.xsph.y = 0;
 
-        di = pi.density;
-        Pi = K*(di - rho0);
+        var di = pi.density;
+        var Pi = K*(di - rho0);
 
         var l = neighbors.length;
         //l = nodes.length;
-        j = -1; while (++j < l)
+        var j = -1; while (++j < l)
         {
             var pj = neighbors[j];
             //pj = nodes[j];
@@ -365,7 +365,7 @@ d3.layout.sph = function() {
     dspiky_coeff = -45.0/(Math.PI*h6);
 
     //var screen_radius = smoothing_radius / sim_scale;
-    var screen_radius = 0.2 * smoothing_radius / sim_scale;
+    screen_radius = 0.2 * smoothing_radius / sim_scale;
     console.log("size = ", size);
     console.log("smoothing_radius = ", smoothing_radius);
     console.log("screen_radius = ", screen_radius);
@@ -436,23 +436,26 @@ d3.layout.sph = function() {
     return force;
   };
 
-  force.linkDistance = function(x) {
-    if (!arguments.length) return linkDistance;
-    linkDistance = d3.functor(x);
-    return force;
-  };
-
   force.gravity = function(x) {
     if (!arguments.length) return gravity;
     gravity = x;
     return force;
   };
 
-  force.theta = function(x) {
-    if (!arguments.length) return theta;
-    theta = x;
+  //we name it rho for a nicer interface outside
+  force.rho = function(x) {
+    if (!arguments.length) return rho;
+    rho0 = x;
     return force;
   };
+
+  force.xsph_factor = function(x) {
+    if (!arguments.length) return xsph_factor;
+    xsph_factor = x;
+    return force;
+  };
+
+
 
   force.maxnum= function(x) {
     if (!arguments.length) return maxnum;
