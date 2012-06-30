@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SPH Fluid Layout</title>
+    <script type="text/javascript" src="../d3/d3.v2.js"></script>
+    <script type="text/javascript" src="sph.js"></script>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <button id="start" onclick="start();">Start</button>
+    <button id="stop" onclick="stop();">Stop</button>
+
+    <script type="text/javascript">
+
+var w = 860,
+    h = 400,
+    n = 200,
+    fill = d3.scale.category10(),
+    //nodes = d3.range(5).map(Object);
+    nodes = d3.range(n).map(Object);
+
+var r = 6;
+
+var vis = d3.select("#chart").append("svg:svg")
+    .attr("width", w)
+    .attr("height", h);
+
+//var force = d3.layout.force()
+var force = d3.layout.sph()
+    .nodes(nodes)
+    .size([w, h])
+    .gravity(9.8)
+    .start();
+
+var node = vis.selectAll("circle.node")
+    .data(nodes)
+  .enter().append("svg:circle")
+    .attr("class", "node")
+    .attr("cx", function(d) { return d.x; })
+    .attr("cy", function(d) { return d.y; })
+    //.attr("r", 5)
+    .attr("r", function(d) { return d.radius/2; })
+    //.style("fill", function(d, i) { return fill(i & 3); })
+    //.style("stroke", function(d, i) { return d3.rgb(fill(i & 3)).darker(2); })
+    .style("fill", function(d, i) { return fill(i); })
+    //.style("stroke", function(d, i) { return d3.rgb(fill(i)).darker(2); })
+    .style("stroke-width", 1.5)
+    .call(force.drag);
+
+vis.style("fill-opacity", 1e-6)
+  .transition()
+    .duration(1000)
+    .style("fill-opacity", 1);
+
+force.on("tick", function(e) {
+
+/*
+  // Push different nodes in different directions for clustering.
+  var k = 6 * e.alpha;
+  nodes.forEach(function(o, i) {
+    //o.x += i & 2 ? k : -k;
+    //o.y += i & 1 ? k : -k;
+    o.x += -k;
+    o.y += -k;
+
+  });
+*/
+
+    //node.attr("cx", function(d) { return d.x; })
+    //    .attr("cy", function(d) { return d.y; });
+    //just stop the nodes at the boundary
+    node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+        .attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); })
+        .style("fill", function(d, i) { return fill(d.color); });
+
+
+});
+
+//d3.select("#start").on("click", function() 
+function start()
+{
+    force.resume()
+}//);
+
+//d3.select("#stop").on("click", function() 
+function stop()
+{
+    force.stop();
+}//);
+
+
+
+    </script>
+
+  </body>
+</html>

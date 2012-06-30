@@ -100,9 +100,10 @@ var drawmove = function(d,i) {
     if(!painting) { return false; }
     d3.event.preventDefault();
 
-    var x = d3.svg.mouse(this)[0];
-    var y = d3.svg.mouse(this)[1];
-    var touches = d3.svg.touches(this);
+    //var x = d3.svg.mouse(this)[0];
+    var x = d3.mouse(this)[0];
+    var y = d3.mouse(this)[1];
+    var touches = d3.touches(this);
 
     //adding the point
     p = {"x": x, "y": y} ;
