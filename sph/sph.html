@@ -47,10 +47,6 @@ var node = vis.selectAll("circle.node")
     .style("stroke-width", 1.5)
     .call(force.drag);
 
-vis.style("fill-opacity", 1e-6)
-  .transition()
-    .duration(1000)
-    .style("fill-opacity", 1);
 
 force.on("tick", function(e) {
 

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SPH Fluid Layout</title>
+    <script type="text/javascript" src="../d3/d3.v2.js"></script>
+    <script type="text/javascript" src="sph.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <button id="start" onclick="start();">Start</button>
+    <button id="stop" onclick="stop();">Stop</button>
+
+    <script type="text/javascript">
+
+var w = 500,
+    h = 300,
+    n = 300,
+    fill = d3.scale.category10(),
+    //nodes = d3.range(5).map(Object);
+    nodes = d3.range(n).map(Object);
+
+var colors = {r: 0, g: 0, b: 255};
+
+var size = 30;
+var threshold = 170;
+
+
+//var force = d3.layout.force()
+var force = d3.layout.sph()
+    .nodes(nodes)
+    .size([w, h])
+    .gravity(9.8)
+    .start();
+
+var canvas = d3.select("#canvas").node();
+canvas.width = w;
+canvas.height = h;
+
+var ctx = canvas.getContext('2d');
+//ctx.fillStyle = "#0000ff";
+
+//from: http://www.somethinghitme.com/2012/06/06/2d-metaballs-with-canvas/
+var tempCanvas = document.createElement("canvas");
+var tempCtx = tempCanvas.getContext("2d");
+tempCanvas.width = w;
+tempCanvas.height = h;
+
+
+var i = 0;
+force.on("tick", function(e) {
+
+    tempCtx.clearRect(0,0,w,h);
+    //ctx.clearRect(0, 0, w, h);
+
+    for(i =0; i<nodes.length; i++) {
+        var x = Math.max(size, Math.min(w - size, nodes[i].x));
+        var y = Math.max(size, Math.min(w - size, nodes[i].y));
+
+        tempCtx.beginPath();
+        var grad = tempCtx.createRadialGradient(x, y, 1, x, y, size);
+        grad.addColorStop(0, 'rgba(' + colors.r +',' + colors.g + ',' + colors.b + ',1)');
+        grad.addColorStop(1, 'rgba(' + colors.r +',' + colors.g + ',' + colors.b + ',0)');
+        tempCtx.fillStyle = grad;
+        tempCtx.arc(x, y, size, 0, Math.PI*2);
+        tempCtx.fill();
+
+        //ctx.fillRect(x, y, 10, 10);
+    }
+
+    metabalize();
+    
+
+});
+
+function metabalize(){
+    var imageData = tempCtx.getImageData(0,0,w,h),
+        pix = imageData.data;
+    
+    for (var i = 0, n = pix.length; i <n; i += 4) {
+        if(pix[i+3]<threshold){
+           pix[i+3]/=6;
+            if(pix[i+3]>threshold/4){
+                pix[i+3]=0;
+            }
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);    
+}
+//d3.select("#start").on("click", function() 
+function start()
+{
+    force.resume()
+}//);
+
+//d3.select("#stop").on("click", function() 
+function stop()
+{
+    force.stop();
+}//);
+
+
+
+    </script>
+
+  </body>
+</html>

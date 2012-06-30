@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SPH Fluid Layout</title>
+    <script type="text/javascript" src="../d3/d3.v2.js"></script>
+    <script type="text/javascript" src="sph.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <button id="start" onclick="start();">Start</button>
+    <button id="stop" onclick="stop();">Stop</button>
+
+    <script type="text/javascript">
+
+var w = 860,
+    h = 400,
+    n = 500,
+    fill = d3.scale.category10(),
+    //nodes = d3.range(5).map(Object);
+    nodes = d3.range(n).map(Object);
+
+var r = 6;
+
+
+//var force = d3.layout.force()
+var force = d3.layout.sph()
+    .nodes(nodes)
+    .size([w, h])
+    .gravity(9.8)
+    .start();
+
+var canvas = d3.select("#canvas").node();
+canvas.width = w;
+canvas.height = h;
+
+var ctx = canvas.getContext('2d');
+ctx.fillStyle = "#0000ff";
+
+var i = 0;
+force.on("tick", function(e) {
+
+    ctx.clearRect(0, 0, w, h);
+    for(i =0; i<nodes.length; i++) {
+        var x = Math.max(r, Math.min(w - r, nodes[i].x));
+        var y = Math.max(r, Math.min(w - r, nodes[i].y));
+        ctx.fillRect(x, y, 10, 10);
+    }
+
+    
+
+});
+
+//d3.select("#start").on("click", function() 
+function start()
+{
+    force.resume()
+}//);
+
+//d3.select("#stop").on("click", function() 
+function stop()
+{
+    force.stop();
+}//);
+
+
+
+    </script>
+
+  </body>
+</html>
