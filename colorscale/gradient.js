@@ -71,6 +71,10 @@ var Handle = function() {
         group.on("mousedown", handle.update_picker);
         handle.update_picker();
 
+        data.on("remove", function() {
+            group.remove();
+        });
+
     };
 
     handle.move = function() {
@@ -151,7 +155,7 @@ var Handle = function() {
         };
         picker.update(c); 
 
-    }
+    };
 
     handle.move_picker = function() {
         //NOTE: this is least elegant part, due to global nature of colorpicker
@@ -330,8 +334,6 @@ var Gradient = function() {
             //if none set min to width;
             hd.x_max(width);
         }
-        //draw the handle
-        hd(group);
         //add hd to list of handles
         handles.splice(insert, 0, hd);
 
@@ -362,7 +364,7 @@ var Gradient = function() {
           lx = left.get("x");
           rx = right.get("x");
           t = (x - lx) / (rx - lx);
-          console.log(t, left_color, right_color, lx, x, rx)
+          //console.log(t, left_color, right_color, lx, x, rx)
           options.color = d3.interpolateRgb(left_color, right_color)(t);
         } else if(!options.color) {
           options.color = "#ff0000";
@@ -377,48 +379,72 @@ var Gradient = function() {
             .attr("id", "rstop" + (handles.length-1))
             .attr("stop-color", hd_data.get("color"));
         //stops are not bound to handles, we just use indices (to avoid having to sort the dom)
-        //svggrad.selectAll("stop") //this wont work because we need 2 stops per handle...
-        //  .data(handles, function(d) { return d.get("id"); });
-
         //so lets update all stops
         for(i = 0; i < handles.length; i++) {
           update_stop(i);
         }
 
-        //listen for change in color to update the stops
-        hd_data.on("change:color", function() {
-            var ind = handles.indexOf(hd);
-            update_stop(ind);
-        });
-
         //listen on the handle's change in sl and sr to update stop position
-        hd_data.on("change:sl", function() {
-            var ind = handles.indexOf(hd);
-            update_stop(ind);
-        });
-        hd_data.on("change:sr", function() {
-            var ind = handles.indexOf(hd);
-            update_stop(ind);
-        });
+        //listen for change in color to update the stops
         //listen on the handle's movement to update the stop positions
-        hd_data.on("move", function() {
+        hd_data.on("change:color change:sl change:sr move", function() {
             var ind = handles.indexOf(hd);
             update_stop(ind);
         });
-
-        function update_stop(ind) {
-            var hdata = handles[ind].data();
+        
+        function update_stop(index) {
+            var hdata = handles[index].data();
             //invert x_scale to figure out stop offset
             var sl = x_scale.invert(hdata.get("x") + hdata.get("sl")) * 100;
             var sr = x_scale.invert(hdata.get("x") + hdata.get("sr")) * 100;
 
-            var left_stop = svggrad.select("#lstop" + ind)
+            var left_stop = svggrad.select("#lstop" + index)
                 .attr("stop-color", hdata.get("color"))
                 .attr("offset", sl + "%");
-            var right_stop = svggrad.select("#rstop" + ind)
+            var right_stop = svggrad.select("#rstop" + index)
                 .attr("stop-color", hdata.get("color"))
                 .attr("offset", sr + "%");
         }
+
+        //remove a handle (by yanking off)
+        hd_data.on("change:dy", function() {
+            var dy = hd_data.get("dy");
+            if(dy < -30) {
+                var ind = handles.indexOf(hd);
+                //remove the svg representations
+                hd_data.trigger("remove");
+                svggrad.select("#lstop" + (handles.length-1)).remove();
+                svggrad.select("#rstop" + (handles.length-1)).remove();
+                
+                //set the appropriate min and max
+                var left, right;
+                if(ind > 0 && ind < handles.length-1) {
+                    left = handles[ind-1];
+                    right = handles[ind+1];
+                    left.x_max(right.data().get("x"));
+                    right.x_min(left.data().get("x"));
+                } else if(ind === 0) {
+                    right = handles[1];
+                    right.x_min(0);
+                } else if(ind === handles.length-1) {
+                    left = handles[ind-1];
+                    left.x_max(width);
+                }
+          
+                //remove the handle from the array
+                handles.splice(ind, 1);
+
+                hd_data.unbind();
+                picker.toggle("false");
+                //reupdate all stops
+                for(i = 0; i < handles.length; i++) {
+                  update_stop(i);
+                }
+            }
+        });
+
+        //draw the handle
+        hd(group);
     };
 
     gradient.x = function(value) {

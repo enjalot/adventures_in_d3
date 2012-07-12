@@ -216,6 +216,10 @@ var Gradient = function() {
     var y = 0;
     var width = 800;
     var height = 100;
+    var color_scale;
+    var nbars = 800;
+    var bar_width;
+
     var x_scale = d3.scale.linear().range([0, width]);
 
     //the gradient's containing group
@@ -236,23 +240,34 @@ var Gradient = function() {
         //create initial frame
         group = g.append("g")
             .attr("transform", "translate(" + [x, y] + ")");
+        
+        var bars = d3.range(nbars);
+        bar_width = width/nbars;
+        var grad = group.selectAll("rect.gbar")
+          .data(bars)
+          .enter()
+          .append("rect")
+          .classed("gbar", true)
+          .attr("stroke", "none")
+          .attr("width", bar_width)
+          .attr("height", height)
+          .attr("transform", function(d,i) {
+            //return "translate(" + [i*bar_width, height/2 - bar_width] + ")";
+            return "translate(" + [i*bar_width, 0] + ")";
+          })
+
+
         var rect = group.append("rect")
             .classed("gradient", true)
             .attr("width", width)
             .attr("height", height)
             .attr("stroke", "#000000")
-            .attr("fill", "url(#" + gradid + ")");
+            //.attr("fill", "url(#" + gradid + ")");
+            .attr("fill", "#ffffff")
+            .attr("fill-opacity", 0)
+            .attr("pointer-events", "all");
 
         rect.on("click", gradient.add_handle);
-
-        defs = g.append("defs");
-        //append the gradient element
-        svggrad = defs.append("svg:linearGradient")
-        .attr("id", gradid)
-        .attr("x1", "0%")
-        .attr("y1", "0%")
-        .attr("x2", "100%")
-        .attr("y2", "0%");
 
         //add 2 defualt handles at each end
         gradient.add_handle({
@@ -283,11 +298,11 @@ var Gradient = function() {
         }
     
         if(!options) {
-            var options = {
+            options = {
               //id: handles.length,
               x: x,
               mx: x//TODO: shouldn't have to set this from outside...
-            }
+            };
         }
         options.height = height;
         options.y = height/2;
@@ -371,50 +386,46 @@ var Gradient = function() {
           lx = left.get("x");
           rx = right.get("x");
           t = (x - lx) / (rx - lx);
-          console.log(t, left_color, right_color, lx, x, rx)
-          options.color = d3.interpolateRgb(left_color, right_color)(t);
+          //console.log(t, left_color, right_color, lx, x, rx)
+          //options.color = d3.interpolateRgb(left_color, right_color)(t);
+          options.color = d3.interpolateHsl(left_color, right_color)(t);
         } else if(!options.color) {
           options.color = "#ff0000";
         }
         hd_data.set({color: options.color});
       
-        //each handle is responsible for two stops
-        svggrad.append("stop")
-            .attr("id", "lstop" + (handles.length-1))
-            .attr("stop-color", hd_data.get("color"));
-        svggrad.append("stop")
-            .attr("id", "rstop" + (handles.length-1))
-            .attr("stop-color", hd_data.get("color"));
-        //stops are not bound to handles, we just use indices (to avoid having to sort the dom)
-        //svggrad.selectAll("stop") //this wont work because we need 2 stops per handle...
-        //  .data(handles, function(d) { return d.get("id"); });
-
-        //so lets update all stops
-        for(i = 0; i < handles.length; i++) {
-          update_stop(i);
-        }
+        update_colors();
         
         //listen on the handle's change in sl and sr to update stop position
         //listen for change in color to update the stops
         //listen on the handle's movement to update the stop positions
         hd_data.on("change:color change:sl change:sr move", function() {
             var ind = handles.indexOf(hd);
-            update_stop(ind);
+            //update_stop(ind);
+            update_colors();
         });
  
 
-        function update_stop(ind) {
-            var hdata = handles[ind].data();
-            //invert x_scale to figure out stop offset
-            var sl = x_scale.invert(hdata.get("x") + hdata.get("sl")) * 100;
-            var sr = x_scale.invert(hdata.get("x") + hdata.get("sr")) * 100;
+        function update_colors() {
+            var i,handle;
+            var domain = [];
+            var colors = [];
 
-            var left_stop = svggrad.select("#lstop" + ind)
-                .attr("stop-color", hdata.get("color"))
-                .attr("offset", sl + "%");
-            var right_stop = svggrad.select("#rstop" + ind)
-                .attr("stop-color", hdata.get("color"))
-                .attr("offset", sr + "%");
+            for(i = 0; i < handles.length; i++) {
+               handle = handles[i].data();
+               domain.push((handle.get("x") + handle.get("sl"))/width);
+               domain.push((handle.get("x") + handle.get("sr"))/width);
+               colors.push(handle.get("color"));
+               colors.push(handle.get("color"));
+            }
+            color_scale = d3.scale.linear()
+              .domain(domain)
+              .interpolate(d3.interpolateHsl)
+              .range(colors);
+            group.selectAll("rect.gbar")
+                .style("fill", function(d,i) {
+                    return color_scale(i/nbars);
+                });
         }
 
         //remove a handle (by yanking off)
@@ -424,8 +435,10 @@ var Gradient = function() {
                 var ind = handles.indexOf(hd);
                 //remove the svg representations
                 hd_data.trigger("remove");
+                /*
                 svggrad.select("#lstop" + (handles.length-1)).remove()
                 svggrad.select("#rstop" + (handles.length-1)).remove()
+                */
                 
                 //set the appropriate min and max
                 var left, right;
@@ -448,12 +461,14 @@ var Gradient = function() {
                 hd_data.unbind();
                 picker.toggle("false");
                 //reupdate all stops
+                /*
                 for(i = 0; i < handles.length; i++) {
                   update_stop(i);
                 }
+                */
+                update_colors();
             }
         });
-
 
         //draw the handle
         hd(group);
@@ -475,6 +490,7 @@ var Gradient = function() {
         width = value;
         //update the scale when the width changes
         x_scale.range([0, width]);
+        bar_width = width/nbars;
         return gradient;
     };
     gradient.height = function(value) {
@@ -482,6 +498,15 @@ var Gradient = function() {
         height = value;
         return gradient;
     };
+    gradient.nbars = function(value) {
+        if (!arguments.length) { return nbars; }
+        nbars = value;
+        bar_width = width/nbars;
+        return gradient;
+    };
+
+
+
 
     return gradient; 
 };
@@ -513,7 +538,8 @@ bg_rect.on("click", function() {
 var grad = new Gradient();
 
 grad.width(tributary.sw-10)
-  .height(tributary.sh);
+  .height(tributary.sh)
+  .nbars(40);
 
 grad(svg);
 //set to true for debugging
