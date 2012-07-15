@@ -1,3 +1,11 @@
+//inspired by http://bl.ocks.org/3014589
+//and http://vis4.net/blog/posts/avoid-equidistant-hsv-colors/
+
+//set to true for debugging
+//tributary.trace = true;
+
+trib.number_bars = 40;
+trib_options.number_bars = {min: 1, max: 400};
 var Handle = function() {
     var data = new Backbone.Model({
         //the x,y coordinates which are the actual location
@@ -217,6 +225,7 @@ var Gradient = function() {
     var width = 800;
     var height = 100;
     var color_scale;
+    var interpolator = d3.cie.interpolateLch;
     var nbars = 800;
     var bar_width;
 
@@ -234,6 +243,8 @@ var Gradient = function() {
     //list of handles
     var handles = [];
 
+    //allow other things to listen for change in the color_scale
+    var grad = new Backbone.Model();
 
     var gradient = function(g) {
 
@@ -243,23 +254,26 @@ var Gradient = function() {
         
         var bars = d3.range(nbars);
         bar_width = width/nbars;
-        var grad = group.selectAll("circle.gbar")
+        var grad = group.selectAll("rect.gbar")
           .data(bars)
           .enter()
-          .append("circle")
+          .append("rect")
           .classed("gbar", true)
           .attr("stroke", "none")
-          .attr("r", bar_width)
+          .attr("width", bar_width)
+          .attr("height", height)
           .attr("transform", function(d,i) {
-            return "translate(" + [i*bar_width, height/2 - bar_width/4] + ")";
+            //return "translate(" + [i*bar_width, height/2 - bar_width] + ")";
+            return "translate(" + [i*bar_width, 0] + ")";
           })
-          .attr("fill-opacity", 0.5);
+
 
         var rect = group.append("rect")
             .classed("gradient", true)
             .attr("width", width)
             .attr("height", height)
-            .attr("stroke", "#000000")
+            //.attr("stroke", "#000000")
+            .attr("stroke", "none")
             //.attr("fill", "url(#" + gradid + ")");
             .attr("fill", "#ffffff")
             .attr("fill-opacity", 0)
@@ -386,7 +400,7 @@ var Gradient = function() {
           t = (x - lx) / (rx - lx);
           //console.log(t, left_color, right_color, lx, x, rx)
           //options.color = d3.interpolateRgb(left_color, right_color)(t);
-          options.color = d3.interpolateHsl(left_color, right_color)(t);
+          options.color = interpolator(left_color, right_color)(t);
         } else if(!options.color) {
           options.color = "#ff0000";
         }
@@ -418,12 +432,17 @@ var Gradient = function() {
             }
             color_scale = d3.scale.linear()
               .domain(domain)
-              .interpolate(d3.interpolateHsl)
+              .interpolate(interpolator)
               .range(colors);
-            group.selectAll(".gbar")
+            group.selectAll("rect.gbar")
                 .style("fill", function(d,i) {
                     return color_scale(i/nbars);
+                })
+                .style("stroke", function(d,i) {
+                    return color_scale(i/nbars);
                 });
+
+            grad.trigger("update:color_scale", color_scale);
         }
 
         //remove a handle (by yanking off)
@@ -502,7 +521,16 @@ var Gradient = function() {
         bar_width = width/nbars;
         return gradient;
     };
-
+    gradient.interpolator = function(value) {
+        if (!arguments.length) { return interpolator; }
+        interpolator = value;
+        return gradient;
+    };
+    gradient.grad = function(value) {
+        if (!arguments.length) { return grad; }
+        grad = value;
+        return gradient;
+    };
 
 
 
@@ -533,12 +561,115 @@ bg_rect.on("click", function() {
     picker.toggle(false);
 });
 
-var grad = new Gradient();
+var w = tributary.sw-20;
+var h = 100;
+var n = parseInt(trib.number_bars);
 
-grad.width(tributary.sw-10)
-  .height(tributary.sh)
-  .nbars(40);
 
-grad(svg);
-//set to true for debugging
-tributary.trace = false;
+var hi = 100;
+
+var gradRGB = new Gradient();
+
+svg.append("text")
+.text("RGB")
+.attr("x", 20)
+.attr("y", hi-10);
+
+gradRGB
+  .x(20)
+  .y(hi)
+  .width(w)
+  .height(h)
+  .interpolator(d3.interpolateRgb)
+  .nbars(n);
+
+//make the shadow gradients
+function makeBars(g) {
+    var bars = d3.range(n);
+    var bar_width = w/n;
+    var grad = g.selectAll("rect.gbar")
+      .data(bars)
+      .enter()
+      .append("rect")
+      .classed("gbar", true)
+      .attr("stroke", "none")
+      .attr("width", bar_width)
+      .attr("height", h)
+      .attr("transform", function(d,i) {
+        //return "translate(" + [i*bar_width, height/2 - bar_width] + ")";
+        return "translate(" + [i*bar_width, 0] + ")";
+      });
+}
+
+var gradEvents = gradRGB.grad();
+gradEvents.on("update:color_scale", function(cs) {
+  var hsl_cs = cs.interpolate(d3.interpolateHsl);
+  svg.selectAll("g.hsl").selectAll("rect.gbar")
+    .style("fill", function(d,i) {
+        return hsl_cs(i/n);
+    })
+    .style("stroke", function(d,i) {
+        return hsl_cs(i/n);
+    });
+
+  var lch_cs = cs.interpolate(d3.cie.interpolateLch);
+  svg.selectAll("g.lch").selectAll("rect.gbar")
+    .style("fill", function(d,i) {
+        return lch_cs(i/n);
+    })
+    .style("stroke", function(d,i) {
+        return lch_cs(i/n);
+    });
+
+  var lab_cs = cs.interpolate(d3.cie.interpolateLab);
+  svg.selectAll("g.lab").selectAll("rect.gbar")
+    .style("fill", function(d,i) {
+        return lab_cs(i/n);
+    })
+    .style("stroke", function(d,i) {
+        return lab_cs(i/n);
+    });
+
+});
+
+
+
+var hsl = svg.append("g")
+  .classed("hsl", true)
+  .attr("transform", "translate(" + [20, hi+140] + ")")
+hsl.append("text")
+  .text("HSL")
+  .attr("y", -10);
+makeBars(hsl);
+
+var lch = svg.append("g")
+  .classed("lch", true)
+  .attr("transform", "translate(" + [20, hi+280] + ")")
+lch.append("text")
+  .text("LCh")
+  .attr("y", -10);
+makeBars(lch);
+
+var lab = svg.append("g")
+  .classed("lab", true)
+  .attr("transform", "translate(" + [20, hi+420] + ")")
+lab.append("text")
+  .text("L*a*b")
+  .attr("y", -10);
+makeBars(lab);
+
+
+svg.append("text")
+  .text("click on the RGB gradient to mess with all of the color spaces.")
+  .attr("x", 20)
+  .attr("y", 30);
+svg.append("text")
+  .text("look how nice and uniform LCh is! (3rd one down)")
+  .attr("x", 20)
+  .attr("y", 50);
+
+
+
+
+gradRGB(svg);
+
