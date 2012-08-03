@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<!--
+    Column chart with single overlayed gradient
+-->
+<html>
+  <head>    
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Enjalot's Gradient Column</title>
+
+
+    <script type="text/javascript" src="../../../d3/d3.js"></script>
+    <script type="text/javascript" src="../../../d3/d3.geom.js"></script>
+    <script type="text/javascript" src="../../../d3/d3.layout.js"></script>
+
+  </head>
+  <body>
+
+    <style type="text/css">
+        /*
+        box-shadow: inset 0px 0px 20px rgba(0,0,0,0.5);
+        */
+    </style>
+
+
+    <script type="text/javascript">
+
+    var data = [{"label":"1990", "value":16}, 
+            {"label":"1991", "value":56}, 
+            {"label":"1992", "value":7},
+            {"label":"1993", "value":77},
+            {"label":"1994", "value":22},
+            {"label":"1995", "value":16},
+            {"label":"1996", "value":66},
+            {"label":"1997", "value":33},
+            {"label":"1998", "value":90},
+            {"label":"1999", "value":85},
+            ];
+
+    //maximum of data you want to use
+    var data_max = 100;
+
+   
+    //w and h are the dimensions of the chart itself, not the whole svg
+    var w = 400;
+    var h = 400;
+    var y = d3.scale.linear()
+            .domain([0, data_max])
+            .range([0, h]);
+    var x = d3.scale.ordinal()
+                .domain(d3.range(data.length))
+                .rangeBands([0, w], .2);
+    
+    /*
+     *  Setup the SVG element and position it
+     */
+    svgw = 600
+    svgh = 600
+
+    var svg = d3.select("body")
+        .append("svg:svg")
+            .attr("width", svgw)
+            .attr("height", svgh)
+
+    var defs = svg.append("svg:defs");
+
+
+    /*
+     * Set up the gradient
+     */
+    function make_blur(blurid, std)
+    {
+        var blur = defs.append("svg:filter")
+            .attr("id", blurid)
+        blur.append("svg:feGaussianBlur")
+            .attr("in", "SourceGraphic")
+            .attr("stdDeviation", std)
+    }
+    function make_linear(id, p1, p2, color, opacity)
+    {
+        var gradient = defs.append("svg:linearGradient")
+            .attr("id", id)
+            .attr("x1", p1.x)
+            .attr("y1", p1.y)
+            .attr("x2", p2.x)
+            .attr("y2", p2.y)
+        gradient.append("svg:stop")
+            .attr("offset", "0%")
+            .attr("stop-color", color)
+            .attr("stop-opacity", opacity)
+        gradient.append("svg:stop")
+            .attr("offset", "50%")
+            .attr("stop-color", color)
+            .attr("stop-opacity", 1e-6)
+    }
+
+    blid = "black_linear";
+    p1 = { "x": "0%", "y": "100%" };
+    p2 = { "x": "0%", "y": "0%" };
+    make_linear(blid, p1, p2, "#000", .4)
+
+    fid = "blur";
+    make_blur(fid, 25)
+
+    svg.append("svg:rect")
+        .attr("class", "background_rect")
+        .attr("width", svgw)
+        .attr("height", svgh)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 2)
+        .attr("fill", "#eee")
+        //.attr("fill", "url(#" + blid + ")")
+        //.attr("transform", "translate(900, 200)")
+
+    svg.append("svg:rect")
+        .attr("class", "vignette")
+        .attr("x", "0%")
+        .attr("y", "0%")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("stroke", "#000")
+        .attr("stroke-width", "5%")
+        .attr("stroke-opacity", .5)
+        .attr("fill", "none")
+        .attr("filter", "url(#" + fid + ")")
+
+
+
+
+    function make_bar(classname, tx, ty, color)
+    {
+        console.log("tx,ty", tx,ty)
+        var vis = svg.append("svg:g")                //make a group to hold our bar chart
+                .attr("id", classname)
+                .attr("class", classname)
+                .attr("transform", "translate(" + [tx,ty] + ")");
+
+
+        /*
+         *  Create the bar chart
+         */
+        var bars = vis.selectAll("g.bar")       //this selects all <g> elements with class slice (there aren't any yet)
+            .data(data)                         //associate the data with svg group elements that will draw each bar
+                .enter()                        //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+                .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+                    .attr("class", "bar")       //allow us to style things in the slices (like text)
+                    .attr("transform", function(d, i) { return "translate(" + [x(i), 0] + ")"; }); 
+
+        /*
+         * Draw the actual bar
+        */
+        bars.append("svg:rect")
+            .attr("class", "fill")
+            .attr("y", function(d) { return h-y(d.value); })
+            .attr("height", function(d) { return y(d.value); })
+            .attr("width", x.rangeBand())
+            //.attr("stroke", function(d,i) { return color(i); })
+            //.attr("stroke-width", 4)
+            .attr("fill", function(d,i) { return color(i); })
+
+
+        /*
+         * overlay clipped gradient
+         * 
+         * We make a clipppath mimicking our actual bars, but we need to transform them using the same transformation 
+         * done to the base group. we then generate a rectangle with the gradient we want.
+         * 
+        */
+        cpid = "cp" + classname
+        cp = vis.append("svg:clipPath")
+            .attr("id", cpid);
+        cp.selectAll("rect")
+            .data(data).enter()
+        .append("svg:rect")
+            .attr("class", "fill")
+            .attr("y", function(d) { return h-y(d.value); })
+            .attr("height", function(d) { return y(d.value); })
+            .attr("width", x.rangeBand())
+            .attr("transform", function(d, i) { return "translate(" + [x(i), 0] + ")"; }); 
+ 
+
+        vis.append("svg:rect")
+            .attr("class", "background_rect")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("stroke", "none")
+            //.attr("fill", "#004")
+            .attr("fill", "url(#" + blid + ")")
+            .attr("clip-path", "url(#"+ cpid + ")")
+
+
+        /*
+        bars.append("svg:rect")
+            .attr("class", "overlay")
+            .attr("y", function(d) { return h-y(d.value); })
+            .attr("height", function(d) { return y(d.value); })
+            .attr("width", x.rangeBand())
+            .attr("stroke", "none")
+            .attr("fill", "url(#gradient)")
+            */
+        }
+
+
+    var color = function(id) { return '#00b3dc' };
+    make_bar("col1", 100, 100, color);
+    /*
+    var color = d3.scale.category10();
+    make_bar("col2", 60 + w, 30, color);
+    */
+
+
+
+        
+    </script>
+  </body>
+</html>
+
